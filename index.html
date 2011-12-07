@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Randomizer</title>
+<style type="text/css">
+    body
+    {
+        width:100%;
+        margin:0px;
+        padding:0px;	
+    }
+    #randomButton
+    {
+    	border:solid 10px #DFE7F2;
+    	border-radius:20px;
+    	box-shadow: 0px 0px 5px 2px rgba(0,0,0,0.2) inset;
+    	
+    	width:250px;
+    	
+    	font-family:Cooper Black;
+    	font-size:32px;
+    	text-align:center;
+    	
+    	color:rgb(255,127,80);
+    	background-color:rgb(176,196,222);
+    	
+    	cursor:pointer;
+    	overflow:hidden;
+    }
+    #randomButton:hover
+    {
+    	box-shadow:none;
+    }
+    
+    #itemsList,#randomList,#randomButton
+    {
+        position:absolute;	
+    }
+    #randomList
+    {
+    	width:250px;
+    }
+    .center
+    {
+    	text-align:center;
+    }
+    .orange
+    {
+        border:solid 5px rgb(255,127,80);
+        background-color:rgba(255,127,80,0.1);	
+        box-shadow: 0px 0px 5px 2px rgba(0,0,0,0.2) inset;
+    }
+    .blue
+    {
+    	border:solid 5px rgb(176,196,222);
+    	background-color:rgba(176,196,222,0.1);
+    }
+	.item
+	{
+		border-radius:20px;
+		
+		
+		width:250px;
+		margin:5px;
+		padding:5px;
+		
+		overflow:hidden;	
+	}
+	.item:hover
+	{
+		box-shadow:none;
+	}
+	.item input[type=text]
+	{
+		width:90%;
+		border:0px;
+		
+		font-family:Verdana;
+		font-size:16px;
+		
+		background-color:Transparent;	
+	}
+	.item input[type=text]:focus
+	{
+		outline:none;
+	}
+	.item span
+	{
+		border-radius:18px;
+		
+		width:18px;
+		height:18px;
+		line-height:18px;
+		
+		font-family:Verdana;
+		font-size:12px;
+		text-align:center;
+		text-transform:uppercase;
+		
+		color:White;
+		background-color:rgba(128,128,128,0.5);
+		
+		cursor:pointer;
+		display:inline-block;
+	}
+	.item span:hover
+	{
+	    background-color:rgba(128,128,128,1);	
+	}
+	#randomListContainer,#showButtonContainer
+	{
+		display:none;
+	}
+	#showButtonContainer:hover
+	{
+		box-shadow: 0px 0px 5px 2px rgba(0,0,0,0.2) inset;
+	}
+	
+</style>
+<script type="text/javascript">
+
+    var mShowRandomList = false;
+
+	document.addEventListener("DOMContentLoaded",init,false);
+	
+	function init()
+	{
+	    var itemsList = document.getElementById("itemsList");
+	    
+	    // add event listener to the first input button
+		var firstItem = itemsList.firstChild;	
+		firstItem.lastChild.addEventListener("click",function(){ deleteItem(firstItem) },false);
+		
+		// add another field
+		addItem();
+		
+		// add event listener to randomize button
+		var randomButton = document.getElementById("randomButton");
+		randomButton.addEventListener("click",randomize,false);
+		
+		// add event listener to show random order
+		var showButton = document.getElementById("showButton");
+		showButton.addEventListener("click",showRandomOrder,false);
+		
+		// position elements
+		positionElems();
+	}
+	
+	function addItem()
+	{	
+		var itemsList = document.getElementById("itemsList");
+		
+		// get the current last input child
+		var lastItem = itemsList.lastChild;
+		// remove the event listener from the last child
+		lastItem.firstChild.removeEventListener("focus",addItem,false);
+		
+		// clone the last child
+		var clonedNode = itemsList.lastChild.cloneNode(true);
+		clonedNode.firstChild.value = "";
+		
+		// append the cloned child to be the new last child
+		lastItem = itemsList.appendChild(clonedNode);
+					
+		// add event listener to the new last child
+		lastItem.firstChild.addEventListener("focus",addItem,false);
+		lastItem.lastChild.addEventListener("click",function(){ deleteItem(lastItem) },false);
+				
+	}
+	
+	function deleteItem(item)
+	{
+	    var itemsList = document.getElementById("itemsList");
+	    
+	    // check if node is the last node
+	    if (item == itemsList.lastChild)
+	        return;
+	    
+	    // delete node    
+	    itemsList.removeChild(item); 
+	}
+	
+	function randomize()
+	{
+		var itemsList = document.getElementById("itemsList");
+		var numItems = itemsList.childNodes.length-1;
+		
+		var items = [];
+		
+		for (var i = 0; i < numItems; i++)
+		{
+		    items.push(itemsList.childNodes[i].firstChild.value);
+		}
+		
+		var randomList = document.getElementById("randomList");
+		// clear random list
+		randomList.firstChild.firstChild.value = "";
+		if (randomList.childNodes[1].hasChildNodes)
+		{
+		    while (randomList.childNodes[1].childNodes.length)
+		    {
+		        randomList.childNodes[1].removeChild(randomList.childNodes[1].firstChild);
+		    }
+		}
+		
+		// fill in first random item
+		var randomNum = parseInt(Math.random() * items.length,10);
+		randomList.firstChild.firstChild.value = items[randomNum];
+		items.splice(randomNum,1);
+		
+		// fill in the remaining items
+		while (items.length)
+		{
+		    randomNum = parseInt(Math.random() * items.length,10);
+		    
+		    var clonedNode = randomList.firstChild.cloneNode(true);
+		    clonedNode.firstChild.value = items[randomNum];
+		    
+		    // append
+		    randomList.childNodes[1].appendChild(clonedNode);
+		    
+		    items.splice(randomNum,1);
+		}
+		
+		// show button
+	    showButtonContainer.style.display = "block";		
+	}
+	
+	function positionElems()
+	{
+	    var randomButton = document.getElementById("randomButton");
+	    randomButton.style.left = (window.innerWidth - randomButton.offsetWidth) / 2 + "px";
+	    randomButton.style.top = "75px"
+	    
+	    var itemsList = document.getElementById("itemsList");
+	    itemsList.style.left = window.innerWidth / 2 - itemsList.offsetWidth + "px";
+	    itemsList.style.top = randomButton.offsetTop + randomButton.offsetHeight + 20 + "px";
+	    
+	    var randomList = document.getElementById("randomList");
+	    randomList.style.left = window.innerWidth / 2 + "px";
+	    randomList.style.top = itemsList.offsetTop + "px";
+	    
+	}
+	
+	function showRandomOrder()
+	{
+	    mShowRandomList = !mShowRandomList;
+	    if (mShowRandomList)
+	    {
+	        randomListContainer.style.display = "block";
+	        showButton.value = "Hide list";
+	    }
+	    else
+	    {
+	        randomListContainer.style.display = "none";
+	        showButton.value = "Show as list";
+	    }
+	}
+
+</script>
+</head>
+
+<body>
+<div id="itemsList"><div class="item orange"><input type="text" placeholder="Add item" /><span>X</span></div></div>
+<div id="randomButton">Randomize!</div>
+<div id="randomList"><div class="item blue"><input type="text" placeholder="Click 'Randomize!'..." readonly="readonly" /></div><div id="randomListContainer"></div><div id="showButtonContainer" class="item blue center"><input id="showButton" type="text" value="Show as list" readonly="readonly" /></div></div>
+</body>
+</html>
